@@ -4,32 +4,32 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model ExcelFile {
-  id         String    @id(map: "PK__ExcelFil__3213E83F0157B655") @db.VarChar(50)
-  Name       String    @db.VarChar(Max)
+  id         String    @id @db.VarChar(50)
+  Name       String    @db.Text
   URL        String?   @db.Text
   ImportDate DateTime? @db.DateTime
   ProjectID  String?   @db.VarChar(50)
-  Project    Project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__ExcelFile__Proje__5BE2A6F2")
+  Project    Project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction)
   SoA        SoA[]
 }
 
 model IFCFile {
-  id         String    @id(map: "PK__IFCFile__3213E83FBFF31721") @db.VarChar(50)
-  Name       String    @db.VarChar(Max)
+  id         String    @id @db.VarChar(50)
+  Name       String    @db.Text
   URL        String?   @db.Text
   ImportDate DateTime? @db.DateTime
   ProjectID  String?   @db.VarChar(50)
-  Project    Project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__IFCFile__Project__5EBF139D")
+  Project    Project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Project {
-  id          String       @id(map: "PK__Project__3213E83F052635CF") @db.VarChar(50)
-  Name        String       @db.VarChar(Max)
+  id          String       @id @db.VarChar(50)
+  Name        String       @db.Text
   Description String?      @db.Text
   CreateDate  DateTime?    @db.DateTime
   ModifyDate  DateTime?    @db.DateTime
@@ -39,73 +39,72 @@ model Project {
   BackUpFile  BackUpFile[]
   ExcelFile   ExcelFile[]
   IFCFile     IFCFile[]
-  User        User?        @relation(fields: [UserId], references: [id], onUpdate: NoAction, map: "FK_Project_User")
+  User        User?        @relation(fields: [UserId], references: [id], onUpdate: NoAction)
 }
 
 model SoA {
-  id                 String     @id(map: "PK__SoA__3213E83FF87D713E") @db.VarChar(50)
-  RefNo              String?    @db.VarChar(Max)
+  id                 String     @id @db.VarChar(50)
+  RefNo              String?    @db.Text
   Description        String?    @db.Text
-  Rooms              String?    @db.VarChar(Max)
-  UnitArea           String?    @db.VarChar(Max)
-  CellularRoom       String?    @db.VarChar(Max)
-  OpenPlan           String?    @db.VarChar(Max)
+  Rooms              String?    @db.Text
+  UnitArea           String?    @db.Text
+  CellularRoom       String?    @db.Text
+  OpenPlan           String?    @db.Text
   SpecialRequirement String?    @db.Text
   ExcelID            String?    @db.VarChar(50)
-  ExcelFile          ExcelFile? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__SoA__ExcelID__619B8048")
+  ExcelFile          ExcelFile? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model sysdiagrams {
-  name         String @db.NVarChar(128)
+  name         String  @db.VarChar(128)
   principal_id Int
-  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B61DAD1B28E") @default(autoincrement())
+  diagram_id   Int     @id @default(autoincrement())
   version      Int?
-  definition   Bytes?
-
-  @@unique([principal_id, name], map: "UK_principal_name")
+  definition   Bytes?  @db.Blob
+  @@unique([principal_id, name])
 }
 
 model BackUpFile {
-  id              String            @id(map: "PK__BackUpFi__3213E83FAF58CBD1") @db.VarChar(50)
+  id              String            @id @db.VarChar(50)
   ProjectID       String?           @db.VarChar(50)
   ImportDate      DateTime?         @db.DateTime
-  Project         Project?          @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__BackUpFil__Proje__32767D0B")
+  Project         Project?          @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ExcelFileBackUp ExcelFileBackUp[]
   IFCFileBackUp   IFCFileBackUp[]
 }
 
 model ExcelFileBackUp {
-  id           String      @id(map: "PK__ExcelFil__3213E83F1D30957D") @db.VarChar(50)
-  Name         String      @db.VarChar(Max)
+  id           String      @id @db.VarChar(50)
+  Name         String      @db.Text
   URL          String?     @db.Text
   BackUpFileID String?     @db.VarChar(50)
-  BackUpFile   BackUpFile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__ExcelFile__BackU__3552E9B6")
+  BackUpFile   BackUpFile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction)
   SoABackUp    SoABackUp[]
 }
 
 model IFCFileBackUp {
-  id           String      @id(map: "PK__IFCFileB__3213E83FF6CDEE28") @db.VarChar(50)
-  Name         String      @db.VarChar(Max)
+  id           String      @id @db.VarChar(50)
+  Name         String      @db.Text
   URL          String?     @db.Text
   BackUpFileID String?     @db.VarChar(50)
-  BackUpFile   BackUpFile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__IFCFileBa__BackU__382F5661")
+  BackUpFile   BackUpFile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model SoABackUp {
-  id                 String           @id(map: "PK__SoABackU__3213E83F8D7E59D1") @db.VarChar(50)
-  RefNo              String?          @db.VarChar(Max)
+  id                 String           @id @db.VarChar(50)
+  RefNo              String?          @db.Text
   Description        String?          @db.Text
-  Rooms              String?          @db.VarChar(Max)
-  UnitArea           String?          @db.VarChar(Max)
-  CellularRoom       String?          @db.VarChar(Max)
-  OpenPlan           String?          @db.VarChar(Max)
+  Rooms              String?          @db.Text
+  UnitArea           String?          @db.Text
+  CellularRoom       String?          @db.Text
+  OpenPlan           String?          @db.Text
   SpecialRequirement String?          @db.Text
   ExcelID            String?          @db.VarChar(50)
-  ExcelFileBackUp    ExcelFileBackUp? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__SoABackUp__Excel__467D75B8")
+  ExcelFileBackUp    ExcelFileBackUp? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model User {
-  id      Int       @id(map: "PK__User__3213E83FA3D8696B") @default(autoincrement())
+  id      Int       @id @default(autoincrement())
   Name    String?   @db.VarChar(100)
   Project Project[]
 }
