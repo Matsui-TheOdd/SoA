@@ -77,8 +77,8 @@ export const getCheckProjectController = async (_req: Request, res: Response) =>
     const filteredProjects = await Promise.all(
       projects.map(async (project) => {
         const [excels, ifcFiles] = await Promise.all([
-          prisma.excelFile.findMany({ where: { ProjectID: project.id } }),
-          prisma.iFCFile.findMany({ where: { ProjectID: project.id } }),
+          prisma.excelfile.findMany({ where: { ProjectID: project.id } }),
+          prisma.ifcfile.findMany({ where: { ProjectID: project.id } }),
         ]);
 
         return excels.length > 0 && ifcFiles.length > 0 ? project : null;

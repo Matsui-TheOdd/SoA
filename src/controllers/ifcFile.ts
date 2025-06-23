@@ -6,7 +6,7 @@ import prisma from "../lib/db";
 export const getAllIfcFileController = async (_req: Request, res: Response) => {
   try {
     const { projectId } = _req.params;
-    const ifcFiles = await prisma.iFCFile.findMany({
+    const ifcFiles = await prisma.ifcfile.findMany({
       where: {
         ProjectID: String(projectId),
       },
@@ -21,7 +21,7 @@ export const getCurrentIfcFileController = async (_req: Request, res: Response) 
   try {
     const { ifcFileId } = _req.params;
 
-    const ifcFile = await prisma.iFCFile.findFirst({
+    const ifcFile = await prisma.ifcfile.findFirst({
       where: {
         id: ifcFileId,
       },
@@ -35,7 +35,7 @@ export const getCurrentIfcFileController = async (_req: Request, res: Response) 
 export const createIfcFileController = async (_req: Request, res: Response) => {
   try {
     const body = _req.body;
-    const ifcFile = await prisma.iFCFile.create({
+    const ifcFile = await prisma.ifcfile.create({
       data: {
         id: body.id,
         Name: String(body.Name),
@@ -61,7 +61,7 @@ export const createIfcFilesController = async (_req: Request, res: Response) => 
 
   try {
     const createdIFCFiles = await prisma.$transaction(async (prisma) => {
-      return prisma.iFCFile.createMany({
+      return prisma.ifcfile.createMany({
         data: ifcFileList.map((ifcFile) => ({
           id: ifcFile.id,
           Name: String(ifcFile.Name),
@@ -83,7 +83,7 @@ export const deleteIfcFileController = async (_req: Request, res: Response) => {
   try {
     const { ifcFileId } = _req.params;
 
-    const deletedifcFile = await prisma.iFCFile.delete({
+    const deletedifcFile = await prisma.ifcfile.delete({
       where: {
         id: ifcFileId,
       }
@@ -104,7 +104,7 @@ export const deleteIfcFilesController = async (_req: Request, res: Response) => 
     }
     const deletedResults = await prisma.$transaction(
       listIFCFile.map((item) => {
-        return prisma.iFCFile.deleteMany({
+        return prisma.ifcfile.deleteMany({
           where: {
             id: item.id,
           },

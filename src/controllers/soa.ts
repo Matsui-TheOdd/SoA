@@ -6,7 +6,7 @@ import prisma from "../lib/db";
 export const getAllSoAController = async (_req: Request, res: Response) => {
   try {
     const { excelId } = _req.params;
-    const soas = await prisma.soA.findMany({
+    const soas = await prisma.soa.findMany({
       where: {
         ExcelID: String(excelId),
       },
@@ -21,7 +21,7 @@ export const getCurrentSoAController = async (_req: Request, res: Response) => {
   try {
     const { soaId } = _req.params;
 
-    const soa = await prisma.soA.findFirst({
+    const soa = await prisma.soa.findFirst({
       where: {
         id: soaId,
       },
@@ -35,7 +35,7 @@ export const getCurrentSoAController = async (_req: Request, res: Response) => {
 export const createSoAController = async (_req: Request, res: Response) => {
   try {
     const body = _req.body;
-    const soa = await prisma.soA.create({
+    const soa = await prisma.soa.create({
       data: {
         id: body.id,
         RefNo: String(body.RefNo),
@@ -64,7 +64,7 @@ export const createSoAsController = async (_req: Request, res: Response) => {
 
   try {
     const createdSoAs = await prisma.$transaction(async (prisma) => {
-      return prisma.soA.createMany({
+      return prisma.soa.createMany({
         data: soaList.map((soa) => ({
           id: soa.id,
           RefNo: String(soa.RefNo),
@@ -90,7 +90,7 @@ export const deleteSoAController = async (_req: Request, res: Response) => {
   try {
     const { excelId } = _req.params;
     const deleteSoA = await prisma.$transaction(async (prisma) => {
-      return prisma.soA.deleteMany({
+      return prisma.soa.deleteMany({
         where: {
           ExcelID: excelId,
         },

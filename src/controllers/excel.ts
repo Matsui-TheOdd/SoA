@@ -6,7 +6,7 @@ import prisma from "../lib/db";
 export const getAllExcelController = async (_req: Request, res: Response) => {
   try {
     const { projectId } = _req.params;
-    const excels = await prisma.excelFile.findMany({
+    const excels = await prisma.excelfile.findMany({
       where: {
         ProjectID: String(projectId),
       },
@@ -21,7 +21,7 @@ export const getCurrentExcelController = async (_req: Request, res: Response) =>
   try {
     const { excelId } = _req.params;
 
-    const excel = await prisma.excelFile.findFirst({
+    const excel = await prisma.excelfile.findFirst({
       where: {
         id: excelId,
       },
@@ -35,7 +35,7 @@ export const getCurrentExcelController = async (_req: Request, res: Response) =>
 export const createExcelController = async (_req: Request, res: Response) => {
   try {
     const body = _req.body;
-    const excel = await prisma.excelFile.create({
+    const excel = await prisma.excelfile.create({
       data: {
         id: body.id,
         Name: String(body.Name),
@@ -61,7 +61,7 @@ export const createExcelsController = async (_req: Request, res: Response) => {
 
   try {
     const createdExcels = await prisma.$transaction(async (prisma) => {
-      return prisma.excelFile.createMany({
+      return prisma.excelfile.createMany({
         data: excelList.map((excel) => ({
           id: excel.id,
           Name: String(excel.Name),
@@ -83,12 +83,12 @@ export const deleteExcelController = async (_req: Request, res: Response) => {
   try {
     const { excelId } = _req.params;
     const deleted = await prisma.$transaction(async (tx) => {
-      const deletedSoAs = await tx.soA.deleteMany({
+      const deletedSoAs = await tx.soa.deleteMany({
         where: {
           ExcelID: excelId,
         },
       });
-      const deletedExcel = await tx.excelFile.delete({
+      const deletedExcel = await tx.excelfile.delete({
         where: {
           id: excelId,
         },
@@ -115,7 +115,7 @@ export const deleteExcelsController = async (_req: Request, res: Response) => {
     }
     const deletedResults = await prisma.$transaction(
       excelList.map((item) => {
-        return prisma.excelFile.deleteMany({
+        return prisma.excelfile.deleteMany({
           where: {
             id: item.id,
           },

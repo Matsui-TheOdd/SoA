@@ -13,8 +13,8 @@ export const commitController = async (_req: Request, res: Response) => {
 
   try {
     const result = await prisma.$transaction(async (prisma) => {
-      const dataExcel = await prisma.excelFile.findMany({ where: { ProjectID: projectId } });
-      const dataIFCFile = await prisma.iFCFile.findMany({ where: { ProjectID: projectId } });
+      const dataExcel = await prisma.excelfile.findMany({ where: { ProjectID: projectId } });
+      const dataIFCFile = await prisma.ifcfile.findMany({ where: { ProjectID: projectId } });
 
       const existingExcelIds = new Set(dataExcel.map((item) => item.id));
       const existingIFCFileIds = new Set(dataIFCFile.map((item) => item.id));
@@ -26,7 +26,7 @@ export const commitController = async (_req: Request, res: Response) => {
         excelList
           .filter((row) => !existingExcelIds.has(row.id))
           .map((excel) =>
-            prisma.excelFile.create({
+            prisma.excelfile.create({
               data: {
                 id: excel.id,
                 ProjectID: projectId,
@@ -43,8 +43,8 @@ export const commitController = async (_req: Request, res: Response) => {
         dataExcel
           .filter((item) => !excelList.some((excel) => excel.id === item.id))
           .map(async (excel) => {
-            await prisma.soA.deleteMany({ where: { ExcelID: excel.id } });
-            return prisma.excelFile.delete({ where: { id: excel.id } });
+            await prisma.soa.deleteMany({ where: { ExcelID: excel.id } });
+            return prisma.excelfile.delete({ where: { id: excel.id } });
           })
       );
 
@@ -53,7 +53,7 @@ export const commitController = async (_req: Request, res: Response) => {
         ifcFileList
           .filter((row) => !existingIFCFileIds.has(row.id))
           .map((ifcFile) =>
-            prisma.iFCFile.create({
+            prisma.ifcfile.create({
               data: {
                 id: ifcFile.id,
                 ProjectID: projectId,
@@ -70,7 +70,7 @@ export const commitController = async (_req: Request, res: Response) => {
         dataIFCFile
           .filter((item) => !ifcFileList.some((ifcFile) => ifcFile.id === item.id))
           .map((ifcFile) =>
-            prisma.iFCFile.delete({ where: { id: ifcFile.id } })
+            prisma.ifcfile.delete({ where: { id: ifcFile.id } })
           )
       );
 
@@ -92,7 +92,7 @@ export const commitController = async (_req: Request, res: Response) => {
       );
 
       if (newSOAEntries.length > 0) {
-        await prisma.soA.createMany({
+        await prisma.soa.createMany({
           data: newSOAEntries,
         });
       }
@@ -129,7 +129,7 @@ export const backupController = async (_req: Request, res: Response) => {
 
   try {
     const backupReq = await prisma.$transaction(async (prisma) => {
-      const backupFile = await prisma.backUpFile.create({
+      const backupFile = await prisma.backupfile.create({
         data: {
           id: crypto.randomUUID(),
           ProjectID: String(projectId),
@@ -146,7 +146,7 @@ export const backupController = async (_req: Request, res: Response) => {
       const uploadDirectoryPath = '\\\\192.168.0.10\\1-Engineering\\1.3-Engineering_Department\\1.3.2-Projects\\Kevin Wong\\ArchSD SoA\\02-Database';
 
       for (const excel of excelList) {
-        const newExcelFile = await prisma.excelFileBackUp.create({
+        const newExcelFile = await prisma.excelfilebackup.create({
           data: {
             id: crypto.randomUUID(),
             Name: String(excel.Name),
@@ -160,7 +160,7 @@ export const backupController = async (_req: Request, res: Response) => {
       console.log("Excel ID Map:", excelIdMap);
 
       if (Array.isArray(ifcFileList) && ifcFileList.length > 0) {
-        await prisma.iFCFileBackUp.createMany({
+        await prisma.ifcfilebackup.createMany({
           data: ifcFileList.map((ifcFile) => ({
             id: crypto.randomUUID(),
             Name: String(ifcFile.Name),
@@ -190,7 +190,7 @@ export const backupController = async (_req: Request, res: Response) => {
 
 
       if (newSOAEntries.length > 0) {
-        await prisma.soABackUp.createMany({
+        await prisma.soabackup.createMany({
           data: newSOAEntries,
         });
       }
@@ -218,8 +218,8 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
   try {
     const [commitResult, backupFile] = await Promise.all([
       prisma.$transaction(async (prisma) => {
-        const dataExcel = await prisma.excelFile.findMany({ where: { ProjectID: projectId } });
-        const dataIFCFile = await prisma.iFCFile.findMany({ where: { ProjectID: projectId } });
+        const dataExcel = await prisma.excelfile.findMany({ where: { ProjectID: projectId } });
+        const dataIFCFile = await prisma.ifcfile.findMany({ where: { ProjectID: projectId } });
 
         const existingExcelIds = new Set(dataExcel.map((item) => item.id));
         const existingIFCFileIds = new Set(dataIFCFile.map((item) => item.id));
@@ -229,7 +229,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
           excelList
             .filter((row) => !existingExcelIds.has(row.id))
             .map((excel) =>
-              prisma.excelFile.create({
+              prisma.excelfile.create({
                 data: {
                   id: excel.id,
                   ProjectID: projectId,
@@ -245,7 +245,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
           excelList
             .filter((row) => existingExcelIds.has(row.id))
             .map((excel) =>
-              prisma.excelFile.update({
+              prisma.excelfile.update({
                 where: {
                   id: excel.id
                 },
@@ -261,8 +261,8 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
           dataExcel
             .filter((item) => !excelList.some((excel) => excel.id === item.id))
             .map(async (excel) => {
-              await prisma.soA.deleteMany({ where: { ExcelID: excel.id } });
-              return prisma.excelFile.delete({ where: { id: excel.id } });
+              await prisma.soa.deleteMany({ where: { ExcelID: excel.id } });
+              return prisma.excelfile.delete({ where: { id: excel.id } });
             })
         );
 
@@ -271,7 +271,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
           ifcFileList
             .filter((row) => !existingIFCFileIds.has(row.id))
             .map((ifcFile) =>
-              prisma.iFCFile.create({
+              prisma.ifcfile.create({
                 data: {
                   id: ifcFile.id,
                   ProjectID: projectId,
@@ -287,7 +287,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
           ifcFileList
             .filter((row) => existingIFCFileIds.has(row.id))
             .map((ifcFile) =>
-              prisma.iFCFile.update({
+              prisma.ifcfile.update({
                 where: { id: ifcFile.id },
                 data: {
                   URL: path.join(uploadDirectoryPath, projectId, "Backup", importDate, "ifc", ifcFile.Name),
@@ -301,7 +301,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
           dataIFCFile
             .filter((item) => !ifcFileList.some((ifcFile) => ifcFile.id === item.id))
             .map((ifcFile) =>
-              prisma.iFCFile.delete({ where: { id: ifcFile.id } })
+              prisma.ifcfile.delete({ where: { id: ifcFile.id } })
             )
         );
 
@@ -323,14 +323,14 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
         );
 
         if (newSOAEntries.length > 0) {
-          await prisma.soA.createMany({ data: newSOAEntries });
+          await prisma.soa.createMany({ data: newSOAEntries });
         }
 
         return { newExcels, deletedExcels, newIFCFiles, deletedIFCFiles, newSOAEntries };
       }),
 
       prisma.$transaction(async (prisma) => {
-        const backupFile = await prisma.backUpFile.create({
+        const backupFile = await prisma.backupfile.create({
           data: {
             id: crypto.randomUUID(),
             ProjectID: String(projectId),
@@ -341,7 +341,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
         const excelIdMap: Record<string, string> = {};
 
         for (const excel of excelList) {
-          const newExcelFile = await prisma.excelFileBackUp.create({
+          const newExcelFile = await prisma.excelfilebackup.create({
             data: {
               id: crypto.randomUUID(),
               Name: String(excel.Name),
@@ -353,7 +353,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
         }
 
         if (Array.isArray(ifcFileList) && ifcFileList.length > 0) {
-          await prisma.iFCFileBackUp.createMany({
+          await prisma.ifcfilebackup.createMany({
             data: ifcFileList.map((ifcFile) => ({
               id: crypto.randomUUID(),
               Name: String(ifcFile.Name),
@@ -382,7 +382,7 @@ export const commitAndBackupController = async (_req: Request, res: Response) =>
         });
 
         if (newSOAEntries.length > 0) {
-          await prisma.soABackUp.createMany({ data: newSOAEntries });
+          await prisma.soabackup.createMany({ data: newSOAEntries });
         }
 
         return backupFile;
@@ -402,7 +402,7 @@ export const getBackUpViewController = async (_req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid input' });
   }
   try {
-    const backupFile = await prisma.backUpFile.findMany({
+    const backupFile = await prisma.backupfile.findMany({
       where: { ProjectID: projectId },
       orderBy: { ImportDate: 'desc' }
     });
@@ -419,18 +419,18 @@ export const restoreViewController = async (_req: Request, res: Response) => {
 
   try {
     const restoreReq = await prisma.$transaction(async (prisma) => {
-      const backupFile = await prisma.backUpFile.findFirst({
+      const backupFile = await prisma.backupfile.findFirst({
         where: { id: backupFileId },
       });
 
       if (!backupFile) {
         return res.status(400).json({ error: 'Invalid input' });
       }
-      const excelNewRecords = await prisma.excelFileBackUp.findMany({
+      const excelNewRecords = await prisma.excelfilebackup.findMany({
         where: { BackUpFileID: backupFileId },
       });
 
-      const soaNewRecords = await prisma.soABackUp.findMany({
+      const soaNewRecords = await prisma.soabackup.findMany({
         where: {
           ExcelID: {
             in: excelNewRecords.map((excel) => excel.id),
@@ -438,7 +438,7 @@ export const restoreViewController = async (_req: Request, res: Response) => {
         },
       });
 
-      const ifcNewRecords = await prisma.iFCFileBackUp.findMany({
+      const ifcNewRecords = await prisma.ifcfilebackup.findMany({
         where: { BackUpFileID: backupFileId },
       });
 
@@ -463,7 +463,7 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
   try {
     const restoreReq = await prisma.$transaction(async (prisma) => {
       // 1. Lấy file sao lưu (backupFile) theo backupFileId
-      const backupFile = await prisma.backUpFile.findFirst({
+      const backupFile = await prisma.backupfile.findFirst({
         where: { id: backupFileId },
       });
 
@@ -472,11 +472,11 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
       }
 
       // 2. Lấy tất cả các bản ghi file cũ từ các bảng hiện tại (excelFile, soA, iFCFile)
-      const excelOldRecords = await prisma.excelFile.findMany({
+      const excelOldRecords = await prisma.excelfile.findMany({
         where: { ProjectID: backupFile.ProjectID },
       });
 
-      const soaOldRecords = await prisma.soA.findMany({
+      const soaOldRecords = await prisma.soa.findMany({
         where: {
           ExcelID: {
             in: excelOldRecords.map((excel) => excel.id),
@@ -484,12 +484,12 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
         },
       });
 
-      const ifcOldRecords = await prisma.iFCFile.findMany({
+      const ifcOldRecords = await prisma.ifcfile.findMany({
         where: { ProjectID: backupFile.ProjectID },
       });
 
       // 3. Xóa các bản ghi soA có khóa ngoại ExcelID phụ thuộc vào excelFile
-      await prisma.soA.deleteMany({
+      await prisma.soa.deleteMany({
         where: {
           ExcelID: {
             in: excelOldRecords.map((excel) => excel.id),
@@ -498,16 +498,16 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
       });
 
       // 4. Xóa các bản ghi excelFile có ProjectID phụ thuộc vào backupFile
-      await prisma.excelFile.deleteMany({
+      await prisma.excelfile.deleteMany({
         where: { ProjectID: backupFile.ProjectID },
       });
 
       // 5. Xóa các bản ghi soABackUp có khóa ngoại ExcelID phụ thuộc vào excelFileBackUp
-      const excelNewRecords = await prisma.excelFileBackUp.findMany({
+      const excelNewRecords = await prisma.excelfilebackup.findMany({
         where: { BackUpFileID: backupFileId },
       });
 
-      await prisma.soABackUp.deleteMany({
+      await prisma.soabackup.deleteMany({
         where: {
           ExcelID: {
             in: excelNewRecords.map((excel) => excel.id),
@@ -516,17 +516,17 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
       });
 
       // 6. Xóa các bản ghi excelFileBackUp (sao lưu) liên quan đến backupFileId
-      await prisma.excelFileBackUp.deleteMany({
+      await prisma.excelfilebackup.deleteMany({
         where: { BackUpFileID: backupFileId },
       });
 
       // 7. Tạo các bản ghi mới từ backup vào bảng hiện tại
-      await prisma.iFCFile.deleteMany({
+      await prisma.ifcfile.deleteMany({
         where: { ProjectID: backupFile.ProjectID },
       });
 
-      await prisma.iFCFile.createMany({
-        data: (await prisma.iFCFileBackUp.findMany({
+      await prisma.ifcfile.createMany({
+        data: (await prisma.ifcfilebackup.findMany({
           where: { BackUpFileID: backupFileId },
         })).map((ifcFile) => ({
           id: ifcFile.id,
@@ -536,8 +536,8 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
         })),
       });
 
-      await prisma.soA.createMany({
-        data: (await prisma.soABackUp.findMany({
+      await prisma.soa.createMany({
+        data: (await prisma.soabackup.findMany({
           where: {
             ExcelID: {
               in: excelNewRecords.map((excel) => excel.id),
@@ -556,7 +556,7 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
         })),
       });
 
-      await prisma.excelFile.createMany({
+      await prisma.excelfile.createMany({
         data: excelNewRecords.map((excel) => ({
           id: excel.id,
           Name: excel.Name,
@@ -566,21 +566,21 @@ export const restoreCommitController = async (_req: Request, res: Response) => {
       });
 
       // 8. Xóa các bản ghi trong bảng sao lưu sau khi đã sao chép sang bảng hiện tại
-      await prisma.iFCFileBackUp.deleteMany({
+      await prisma.ifcfilebackup.deleteMany({
         where: { BackUpFileID: backupFileId },
       });
 
       return {
         backupFile,
         excelNewRecords,
-        soaNewRecords: await prisma.soA.findMany({
+        soaNewRecords: await prisma.soa.findMany({
           where: {
             ExcelID: {
               in: excelNewRecords.map((excel) => excel.id),
             },
           },
         }),
-        ifcNewRecords: await prisma.iFCFile.findMany({
+        ifcNewRecords: await prisma.ifcfile.findMany({
           where: { ProjectID: backupFile.ProjectID },
         }),
       };

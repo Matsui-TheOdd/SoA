@@ -8,41 +8,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ExcelFile {
+model sysdiagrams {
+  name         String @db.VarChar(128)
+  principal_id Int
+  diagram_id   Int    @id @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_sysdiagrams_principal_name")
+}
+
+model backupfile {
+  id              String            @id @db.VarChar(50)
+  ProjectID       String?           @db.VarChar(50)
+  ImportDate      DateTime?         @db.DateTime(0)
+  project         project?          @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BackUpFile_Project")
+  excelfilebackup excelfilebackup[]
+  ifcfilebackup   ifcfilebackup[]
+
+  @@index([ProjectID], map: "IDX_BackUpFile_ProjectID")
+}
+
+model excelfile {
   id         String    @id @db.VarChar(50)
   Name       String    @db.Text
   URL        String?   @db.Text
-  ImportDate DateTime? @db.DateTime
+  ImportDate DateTime? @db.DateTime(0)
   ProjectID  String?   @db.VarChar(50)
-  Project    Project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  SoA        SoA[]
+  project    project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_ExcelFile_Project")
+  soa        soa[]
+
+  @@index([ProjectID], map: "IDX_ExcelFile_ProjectID")
 }
 
-model IFCFile {
+model excelfilebackup {
+  id           String      @id @db.VarChar(50)
+  Name         String      @db.Text
+  URL          String?     @db.Text
+  BackUpFileID String?     @db.VarChar(50)
+  backupfile   backupfile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_ExcelFileBackUp_BackUpFile")
+  soabackup    soabackup[]
+
+  @@index([BackUpFileID], map: "IDX_ExcelFileBackUp_BackUpFileID")
+}
+
+model ifcfile {
   id         String    @id @db.VarChar(50)
   Name       String    @db.Text
   URL        String?   @db.Text
-  ImportDate DateTime? @db.DateTime
+  ImportDate DateTime? @db.DateTime(0)
   ProjectID  String?   @db.VarChar(50)
-  Project    Project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  project    project?  @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_IFCFile_Project")
+
+  @@index([ProjectID], map: "IDX_IFCFile_ProjectID")
 }
 
-model Project {
+model ifcfilebackup {
+  id           String      @id @db.VarChar(50)
+  Name         String      @db.Text
+  URL          String?     @db.Text
+  BackUpFileID String?     @db.VarChar(50)
+  backupfile   backupfile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_IFCFileBackUp_BackUpFile")
+
+  @@index([BackUpFileID], map: "IDX_IFCFileBackUp_BackUpFileID")
+}
+
+model project {
   id          String       @id @db.VarChar(50)
   Name        String       @db.Text
   Description String?      @db.Text
-  CreateDate  DateTime?    @db.DateTime
-  ModifyDate  DateTime?    @db.DateTime
+  CreateDate  DateTime?    @db.DateTime(0)
+  ModifyDate  DateTime?    @db.DateTime(0)
   isDelete    Boolean?
   Status      String?      @db.VarChar(50)
   UserId      Int?
-  BackUpFile  BackUpFile[]
-  ExcelFile   ExcelFile[]
-  IFCFile     IFCFile[]
-  User        User?        @relation(fields: [UserId], references: [id], onUpdate: NoAction)
+  backupfile  backupfile[]
+  excelfile   excelfile[]
+  ifcfile     ifcfile[]
+  user        user?        @relation(fields: [UserId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Project_User")
+
+  @@index([UserId], map: "IDX_Project_UserId")
 }
 
-model SoA {
+model soa {
   id                 String     @id @db.VarChar(50)
   RefNo              String?    @db.Text
   Description        String?    @db.Text
@@ -52,45 +100,12 @@ model SoA {
   OpenPlan           String?    @db.Text
   SpecialRequirement String?    @db.Text
   ExcelID            String?    @db.VarChar(50)
-  ExcelFile          ExcelFile? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  excelfile          excelfile? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_SoA_ExcelFile")
+
+  @@index([ExcelID], map: "IDX_SoA_ExcelID")
 }
 
-model sysdiagrams {
-  name         String  @db.VarChar(128)
-  principal_id Int
-  diagram_id   Int     @id @default(autoincrement())
-  version      Int?
-  definition   Bytes?  @db.Blob
-  @@unique([principal_id, name])
-}
-
-model BackUpFile {
-  id              String            @id @db.VarChar(50)
-  ProjectID       String?           @db.VarChar(50)
-  ImportDate      DateTime?         @db.DateTime
-  Project         Project?          @relation(fields: [ProjectID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  ExcelFileBackUp ExcelFileBackUp[]
-  IFCFileBackUp   IFCFileBackUp[]
-}
-
-model ExcelFileBackUp {
-  id           String      @id @db.VarChar(50)
-  Name         String      @db.Text
-  URL          String?     @db.Text
-  BackUpFileID String?     @db.VarChar(50)
-  BackUpFile   BackUpFile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  SoABackUp    SoABackUp[]
-}
-
-model IFCFileBackUp {
-  id           String      @id @db.VarChar(50)
-  Name         String      @db.Text
-  URL          String?     @db.Text
-  BackUpFileID String?     @db.VarChar(50)
-  BackUpFile   BackUpFile? @relation(fields: [BackUpFileID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model SoABackUp {
+model soabackup {
   id                 String           @id @db.VarChar(50)
   RefNo              String?          @db.Text
   Description        String?          @db.Text
@@ -100,11 +115,13 @@ model SoABackUp {
   OpenPlan           String?          @db.Text
   SpecialRequirement String?          @db.Text
   ExcelID            String?          @db.VarChar(50)
-  ExcelFileBackUp    ExcelFileBackUp? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  excelfilebackup    excelfilebackup? @relation(fields: [ExcelID], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_SoABackUp_ExcelFileBackUp")
+
+  @@index([ExcelID], map: "IDX_SoABackUp_ExcelID")
 }
 
-model User {
+model user {
   id      Int       @id @default(autoincrement())
   Name    String?   @db.VarChar(100)
-  Project Project[]
+  project project[]
 }
