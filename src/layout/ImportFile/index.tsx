@@ -2948,6 +2948,18 @@ const ImportFile = (props: {
                               {checkOnClick ? (
                                 <>
                                   <a
+                                    href={`/${props.userId}/Projects/${props.projectId}/ViewBCF/`}
+                                    style={{ textDecoration: "none" }}
+                                  >
+                                    <Button
+                                      sx={{ height: 50 }}
+                                      variant="contained"
+                                      color="error"
+                                    >
+                                      View Results In BCF Viewer
+                                    </Button>
+                                  </a>
+                                  <a
                                     href={`/${props.userId}/Projects/${props.projectId}/ViewIFC/`}
                                     style={{ textDecoration: "none" }}
                                   >
@@ -3005,6 +3017,14 @@ const ImportFile = (props: {
                                 </>
                               ) : (
                                 <>
+                                  <Button
+                                    sx={{ height: 50 }}
+                                    variant="contained"
+                                    color="error"
+                                    disabled
+                                  >
+                                    View Results In BCF Viewer
+                                  </Button>
                                   <Button
                                     sx={{ height: 50 }}
                                     variant="contained"
